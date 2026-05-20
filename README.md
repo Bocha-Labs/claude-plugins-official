@@ -50,6 +50,30 @@ After installation, restart Claude Code or run:
 /reload-plugins
 ```
 
+### Updating After a New Plugin Version
+
+If you installed the plugin from the Bocha marketplace, update it with:
+
+```bash
+/plugin update bocha-web-search
+/reload-plugins
+```
+
+If Claude Code still shows the old behavior after an update, reinstall it:
+
+```bash
+/plugin uninstall bocha-web-search
+/plugin install bocha-web-search@bocha-plugins
+/reload-plugins
+```
+
+If you use `--plugin-dir`, Claude loads the plugin directly from your local files. Pull the latest repository changes, then restart Claude Code or reload plugins:
+
+```bash
+git pull
+/reload-plugins
+```
+
 ## Repository Layout
 
 ```text

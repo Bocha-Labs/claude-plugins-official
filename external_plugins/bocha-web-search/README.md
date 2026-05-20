@@ -47,6 +47,30 @@ Or install it from a marketplace after the plugin is published there:
 
 If Claude Code is configured to use the `Bocha-Labs/claude-plugins-official` marketplace fork, this plugin can be installed from that marketplace entry once published there.
 
+### 4. Update or reinstall after a new version
+
+If the plugin was installed from a marketplace:
+
+```bash
+/plugin update bocha-web-search
+/reload-plugins
+```
+
+If the update does not take effect, reinstall it:
+
+```bash
+/plugin uninstall bocha-web-search
+/plugin install bocha-web-search@bocha-plugins
+/reload-plugins
+```
+
+If you run the plugin with `--plugin-dir`, update your local repository and reload plugins:
+
+```bash
+git pull
+/reload-plugins
+```
+
 ## Tool
 
 ### `bocha_web_search`

@@ -79,15 +79,20 @@ function log(message) {
   process.stderr.write(`[bocha-web-search] ${message}\n`)
 }
 
-function encodeMessage(message) {
+function encodeContentLengthMessage(message) {
   const json = JSON.stringify(message)
   return `Content-Length: ${Buffer.byteLength(json, 'utf8')}\r\n\r\n${json}`
+}
+
+function encodeJsonLineMessage(message) {
+  return `${JSON.stringify(message)}\n`
 }
 
 class StdioJsonRpcServer {
   constructor() {
     this.buffer = Buffer.alloc(0)
     this.contentLength = null
+    this.protocol = null
   }
 
   start() {
@@ -104,42 +109,80 @@ class StdioJsonRpcServer {
 
   consume() {
     while (true) {
-      if (this.contentLength == null) {
-        const headerEnd = this.buffer.indexOf('\r\n\r\n')
-        if (headerEnd === -1) return
-
-        const headerText = this.buffer.subarray(0, headerEnd).toString('utf8')
-        const match = headerText.match(/Content-Length:\s*(\d+)/i)
-        if (!match) {
-          log('received malformed MCP frame without Content-Length')
-          this.buffer = this.buffer.subarray(headerEnd + 4)
-          continue
+      if (!this.protocol) {
+        const prefix = this.buffer.subarray(0, Math.min(this.buffer.length, 32)).toString('utf8').trimStart()
+        if (/^Content-Length:/i.test(prefix)) {
+          this.protocol = 'content-length'
+        } else if (prefix.startsWith('{') || prefix.startsWith('[')) {
+          this.protocol = 'json-line'
+        } else {
+          return
         }
-
-        this.contentLength = Number(match[1])
-        this.buffer = this.buffer.subarray(headerEnd + 4)
       }
 
-      if (this.buffer.length < this.contentLength) return
+      if (this.protocol === 'content-length') {
+        if (this.contentLength == null) {
+          const headerEnd = this.buffer.indexOf('\r\n\r\n')
+          if (headerEnd === -1) return
 
-      const payload = this.buffer.subarray(0, this.contentLength).toString('utf8')
-      this.buffer = this.buffer.subarray(this.contentLength)
-      this.contentLength = null
+          const headerText = this.buffer.subarray(0, headerEnd).toString('utf8')
+          const match = headerText.match(/Content-Length:\s*(\d+)/i)
+          if (!match) {
+            log('received malformed MCP frame without Content-Length')
+            this.buffer = this.buffer.subarray(headerEnd + 4)
+            continue
+          }
 
-      let message
-      try {
-        message = JSON.parse(payload)
-      } catch (error) {
-        log(`failed to parse JSON-RPC payload: ${error}`)
+          this.contentLength = Number(match[1])
+          this.buffer = this.buffer.subarray(headerEnd + 4)
+        }
+
+        if (this.buffer.length < this.contentLength) return
+
+        const payload = this.buffer.subarray(0, this.contentLength).toString('utf8')
+        this.buffer = this.buffer.subarray(this.contentLength)
+        this.contentLength = null
+        this.handlePayload(payload)
         continue
       }
 
-      void this.handleMessage(message)
+      if (this.protocol === 'json-line') {
+        const newlineIndex = this.buffer.indexOf('\n')
+        if (newlineIndex === -1) return
+
+        const payload = this.buffer.subarray(0, newlineIndex).toString('utf8').trim()
+        this.buffer = this.buffer.subarray(newlineIndex + 1)
+        if (!payload) {
+          continue
+        }
+
+        this.handlePayload(payload)
+        continue
+      }
+
+      return
     }
   }
 
+  handlePayload(payload) {
+    let message
+    try {
+      message = JSON.parse(payload)
+    } catch (error) {
+      log(`failed to parse JSON-RPC payload: ${error}`)
+      return
+    }
+
+    void this.handleMessage(message)
+  }
+
   send(message) {
-    process.stdout.write(encodeMessage(message))
+    if (this.protocol === 'json-line') {
+      process.stdout.write(encodeJsonLineMessage(message))
+      return
+    }
+
+    process.stdout.write(encodeContentLengthMessage(message))
   }
 
   sendResult(id, result) {

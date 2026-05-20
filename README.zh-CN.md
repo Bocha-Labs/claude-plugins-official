@@ -50,6 +50,30 @@ claude --plugin-dir ./external_plugins/bocha-web-search
 /reload-plugins
 ```
 
+### 插件版本更新后如何升级
+
+如果你是通过 Bocha marketplace 安装的插件，升级命令如下：
+
+```bash
+/plugin update bocha-web-search
+/reload-plugins
+```
+
+如果升级后 Claude Code 仍然表现得像旧版本，可以直接重装：
+
+```bash
+/plugin uninstall bocha-web-search
+/plugin install bocha-web-search@bocha-plugins
+/reload-plugins
+```
+
+如果你使用的是 `--plugin-dir` 本地加载方式，Claude 会直接读取本地文件。此时只需要拉取最新仓库代码，然后重启 Claude Code 或执行插件重载：
+
+```bash
+git pull
+/reload-plugins
+```
+
 ## 仓库结构
 
 ```text

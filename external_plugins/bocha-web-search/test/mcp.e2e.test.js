@@ -13,6 +13,10 @@ function encodeMessage(message) {
   return `Content-Length: ${Buffer.byteLength(json, 'utf8')}\r\n\r\n${json}`
 }
 
+function encodeJsonLineMessage(message) {
+  return `${JSON.stringify(message)}\n`
+}
+
 function createMcpClient(child) {
   let buffer = Buffer.alloc(0)
   let contentLength = null
@@ -60,6 +64,42 @@ function createMcpClient(child) {
   }
 }
 
+function createJsonLineMcpClient(child) {
+  let buffer = ''
+  const pending = new Map()
+
+  child.stdout.on('data', chunk => {
+    buffer += chunk.toString('utf8')
+
+    while (true) {
+      const newlineIndex = buffer.indexOf('\n')
+      if (newlineIndex === -1) return
+
+      const line = buffer.slice(0, newlineIndex).trim()
+      buffer = buffer.slice(newlineIndex + 1)
+      if (!line) continue
+
+      const message = JSON.parse(line)
+      const resolver = pending.get(message.id)
+      if (resolver) {
+        pending.delete(message.id)
+        resolver(message)
+      }
+    }
+  })
+
+  return {
+    request(id, method, params) {
+      const promise = new Promise(resolve => pending.set(id, resolve))
+      child.stdin.write(encodeJsonLineMessage({ jsonrpc: '2.0', id, method, params }))
+      return promise
+    },
+    notify(method, params) {
+      child.stdin.write(encodeJsonLineMessage({ jsonrpc: '2.0', method, params }))
+    },
+  }
+}
+
 test('MCP server lists bocha_web_search and returns a missing-key error without credentials', async () => {
   const child = spawn(process.execPath, [serverPath], {
     env: {
@@ -97,6 +137,40 @@ test('MCP server lists bocha_web_search and returns a missing-key error without 
 
     assert.equal(call.result.isError, true)
     assert.match(call.result.content[0].text, /BOCHA_API_KEY/)
+  } finally {
+    child.stdin.end()
+    child.kill('SIGTERM')
+    await once(child, 'exit')
+  }
+})
+
+test('MCP server also supports JSON line stdio framing used by Claude Code', async () => {
+  const child = spawn(process.execPath, [serverPath], {
+    env: {
+      ...process.env,
+      BOCHA_API_KEY: '',
+    },
+    stdio: ['pipe', 'pipe', 'pipe'],
+  })
+
+  const client = createJsonLineMcpClient(child)
+
+  try {
+    const initialize = await client.request(21, 'initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: {
+        name: 'node-test',
+        version: '0.0.0',
+      },
+    })
+
+    assert.equal(initialize.result.serverInfo.name, 'bocha-web-search')
+    client.notify('notifications/initialized', {})
+
+    const tools = await client.request(22, 'tools/list', {})
+    assert.ok(Array.isArray(tools.result.tools))
+    assert.equal(tools.result.tools[0].name, 'bocha_web_search')
   } finally {
     child.stdin.end()
     child.kill('SIGTERM')
