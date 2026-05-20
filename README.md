@@ -59,6 +59,8 @@ If you installed the plugin from the Bocha marketplace, update it with:
 /reload-plugins
 ```
 
+Note: marketplace-installed plugins generally require a new plugin `version` before `/plugin update` picks up the latest release.
+
 If Claude Code still shows the old behavior after an update, reinstall it:
 
 ```bash

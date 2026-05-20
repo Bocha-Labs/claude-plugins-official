@@ -59,6 +59,8 @@ claude --plugin-dir ./external_plugins/bocha-web-search
 /reload-plugins
 ```
 
+说明：通过 marketplace 安装的插件，通常需要插件 `version` 发生变化后，`/plugin update` 才会拉取到新版本。
+
 如果升级后 Claude Code 仍然表现得像旧版本，可以直接重装：
 
 ```bash

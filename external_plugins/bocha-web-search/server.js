@@ -4,7 +4,7 @@ import { bochaWebSearch, buildToolResult, BochaError, VALID_FRESHNESS_VALUES } f
 
 const SERVER_INFO = {
   name: 'bocha-web-search',
-  version: '0.1.0',
+  version: '0.1.1',
 }
 
 const TOOL_NAME = 'bocha_web_search'

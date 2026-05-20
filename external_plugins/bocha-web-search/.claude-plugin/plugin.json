@@ -1,6 +1,6 @@
 {
   "name": "bocha-web-search",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bocha Web Search for Claude Code. Search the live web for current events, news, and fact verification with structured, source-linked results.",
   "author": {
     "name": "Bocha",
