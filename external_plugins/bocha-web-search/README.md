@@ -31,11 +31,21 @@ Run Claude Code with the plugin directory:
 claude --plugin-dir /absolute/path/to/external_plugins/bocha-web-search
 ```
 
-Or install it from this marketplace repository after the marketplace entry is merged:
+In the `Bocha-Labs/claude-plugins-official` fork, this plugin lives at:
+
+```text
+external_plugins/bocha-web-search
+```
+
+If this plugin is later split into its own repository, point `--plugin-dir` at that repository root.
+
+Or install it from a marketplace after the plugin is published there:
 
 ```bash
-/plugin install bocha-web-search@claude-plugins-official
+/plugin install bocha-web-search@your-marketplace
 ```
+
+If Claude Code is configured to use the `Bocha-Labs/claude-plugins-official` marketplace fork, this plugin can be installed from that marketplace entry once published there.
 
 ## Tool
 
@@ -79,8 +89,28 @@ Run tests:
 npm test
 ```
 
+Validate the plugin structure:
+
+```bash
+claude plugin validate /absolute/path/to/bocha-web-search
+```
+
 Run the optional live integration test:
 
 ```bash
 BOCHA_API_KEY=your-api-key node --test test/bocha.test.js --test-name-pattern="live"
 ```
+
+Run the optional live MCP end-to-end test:
+
+```bash
+BOCHA_API_KEY=your-api-key node --test test/mcp.e2e.test.js --test-name-pattern="live"
+```
+
+## Publishing Notes
+
+- Keep `.claude-plugin/plugin.json` at the repository root under `.claude-plugin/`
+- Keep `.mcp.json`, `skills/`, `README.md`, and `LICENSE` at the plugin root
+- Bump the plugin `version` in `.claude-plugin/plugin.json` for releases
+- In the current monorepo layout, keep `repository` pointed at `https://github.com/Bocha-Labs/claude-plugins-official`
+- If the plugin is split into a dedicated repository later, update `repository` and installation examples accordingly

@@ -103,3 +103,54 @@ test('MCP server lists bocha_web_search and returns a missing-key error without 
     await once(child, 'exit')
   }
 })
+
+test(
+  'live MCP end-to-end search works when BOCHA_API_KEY is set',
+  { skip: !process.env.BOCHA_API_KEY },
+  async () => {
+    const child = spawn(process.execPath, [serverPath], {
+      env: {
+        ...process.env,
+        BOCHA_API_KEY: process.env.BOCHA_API_KEY,
+      },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+
+    const client = createMcpClient(child)
+
+    try {
+      const initialize = await client.request(11, 'initialize', {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: {
+          name: 'node-test',
+          version: '0.0.0',
+        },
+      })
+
+      assert.equal(initialize.result.serverInfo.name, 'bocha-web-search')
+      client.notify('notifications/initialized', {})
+
+      const call = await client.request(12, 'tools/call', {
+        name: 'bocha_web_search',
+        arguments: {
+          query: 'Bocha open platform',
+          count: 3,
+          freshness: 'noLimit',
+          summary: true,
+        },
+      })
+
+      assert.equal(call.result.isError, undefined)
+      assert.equal(typeof call.result.structuredContent.logId, 'string')
+      assert.ok(Array.isArray(call.result.structuredContent.results))
+      assert.ok(call.result.structuredContent.results.length > 0)
+      assert.match(call.result.content[0].text, /References:/)
+      assert.equal(typeof call.result.structuredContent.results[0].url, 'string')
+    } finally {
+      child.stdin.end()
+      child.kill('SIGTERM')
+      await once(child, 'exit')
+    }
+  },
+)

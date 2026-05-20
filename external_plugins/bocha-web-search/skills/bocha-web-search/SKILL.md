@@ -1,12 +1,15 @@
 ---
-name: bocha-web-search
-description: This skill should be used when the user asks for real-time information, latest news, fact checking, or fresh web research. Use it with the bocha_web_search tool and cite results as [1], [2], ... with a references list.
-version: 0.1.0
+description: Use Bocha Web Search when the user needs current web information, news, or fact checking with cited sources.
 ---
 
 # Bocha Web Search
 
-Use this skill when live web data is required and the answer cannot safely rely on static model knowledge.
+Use this skill when live web data is required and the answer cannot safely rely on static model knowledge. Especially suitable for Chinese users:
+
+- Current events, news, and policy updates
+- Fact verification with recent web sources
+- Product, company, and ecosystem information lookup
+- External references gathering before summarizing a topic
 
 ## When To Use
 
@@ -17,7 +20,7 @@ Use `bocha_web_search` for requests such as:
 - Looking up fresh product, company, or ecosystem information
 - Gathering external references before summarizing a topic
 
-Avoid this skill when the answer can be completed from repository context or from stable built-in knowledge.
+Avoid this skill when the answer can be completed from repository context or stable built-in knowledge.
 
 ## Tool Contract
 
@@ -41,11 +44,3 @@ After using the tool:
 3. End with a `References` list that maps each citation number to the source URL.
 4. Prefer the tool's `summary` field when present, and fall back to `snippet` otherwise.
 5. Mention uncertainty when results are sparse, conflicting, or obviously incomplete.
-
-## Suggested Workflow
-
-1. Write a focused `query`.
-2. Set `freshness` based on how current the answer must be.
-3. Inspect the numbered results and identify the strongest sources.
-4. Synthesize the answer with explicit citations.
-5. Append a `References` section with the URLs that were actually used.

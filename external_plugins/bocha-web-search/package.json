@@ -6,6 +6,8 @@
   "bin": "./server.js",
   "scripts": {
     "start": "node ./server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "validate": "claude plugin validate .",
+    "test:live": "node --test --test-name-pattern=live"
   }
 }
