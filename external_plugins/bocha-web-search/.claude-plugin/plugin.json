@@ -1,0 +1,10 @@
+{
+  "name": "bocha-web-search",
+  "description": "Bocha Web Search for Claude Code. Search the live web for current events, news, and fact verification with structured, source-linked results.",
+  "author": {
+    "name": "Bocha",
+    "url": "https://open.bocha.cn"
+  },
+  "homepage": "https://open.bocha.cn",
+  "keywords": ["search", "web-search", "news", "fact-checking", "bocha"]
+}
