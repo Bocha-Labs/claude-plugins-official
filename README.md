@@ -1,51 +1,97 @@
-# Claude Code Plugins Directory
+# Bocha Claude Code Plugins
 
-A curated directory of high-quality plugins for Claude Code.
+[![English](https://img.shields.io/badge/English-README-0A66C2)](./README.md)
+[![简体中文](https://img.shields.io/badge/简体中文-README-555555)](./README.zh-CN.md)
 
-> **⚠️ Important:** Make sure you trust a plugin before installing, updating, or using it. Anthropic does not control what MCP servers, files, or other software are included in plugins and cannot verify that they will work as intended or that they won't change. See each plugin's homepage for more information.
+Bocha's Claude Code plugin repository. This repository currently publishes an external plugin: `bocha-web-search`.
 
-## Structure
+> Important: Only install plugins you trust. Plugins may run MCP servers, access local files, and call external APIs.
 
-- **`/plugins`** - Internal plugins developed and maintained by Anthropic
-- **`/external_plugins`** - Third-party plugins from partners and the community
+## What This Repository Contains
 
-## Installation
+- A lightweight Claude Code marketplace manifest: `.claude-plugin/marketplace.json`
+- The Bocha Web Search plugin: `external_plugins/bocha-web-search`
+- Chinese README: `README.zh-CN.md`
 
-Plugins can be installed directly from this marketplace via Claude Code's plugin system.
+This repository no longer carries Anthropic's built-in plugins or unrelated third-party examples. The goal is to keep the repository easy to audit, easy to maintain, and easy for Claude Code users to install from.
 
-To install, run `/plugin install {plugin-name}@claude-plugins-official`
+## Quick Start
 
-or browse for the plugin in `/plugin > Discover`
+### Option 1: Direct local loading
 
-## Contributing
+Clone the repository and load the plugin directly:
 
-### Internal Plugins
-
-Internal plugins are developed by Anthropic team members. See `/plugins/example-plugin` for a reference implementation.
-
-### External Plugins
-
-Third-party partners can submit plugins for inclusion in the marketplace. External plugins must meet quality and security standards for approval. To submit a new plugin, use the [plugin directory submission form](https://clau.de/plugin-directory-submission).
-
-## Plugin Structure
-
-Each plugin follows a standard structure:
-
+```bash
+git clone https://github.com/Bocha-Labs/claude-plugins-official.git
+cd claude-plugins-official
+export BOCHA_API_KEY="your-api-key"
+claude --plugin-dir ./external_plugins/bocha-web-search
 ```
-plugin-name/
+
+This is the fastest path for local development and manual verification.
+
+### Option 2: Install through Claude Code marketplace
+
+Add this repository as a custom marketplace:
+
+```bash
+/plugin marketplace add Bocha-Labs/claude-plugins-official
+```
+
+Then install the plugin:
+
+```bash
+/plugin install bocha-web-search@bocha-plugins
+```
+
+After installation, restart Claude Code or run:
+
+```bash
+/reload-plugins
+```
+
+## Repository Layout
+
+```text
+claude-plugins-official/
 ├── .claude-plugin/
-│   └── plugin.json      # Plugin metadata (required)
-├── .mcp.json            # MCP server configuration (optional)
-├── commands/            # Slash commands (optional)
-├── agents/              # Agent definitions (optional)
-├── skills/              # Skill definitions (optional)
-└── README.md            # Documentation
+│   └── marketplace.json
+├── external_plugins/
+│   └── bocha-web-search/
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       ├── .mcp.json
+│       ├── skills/
+│       ├── lib/
+│       ├── test/
+│       ├── server.js
+│       ├── package.json
+│       ├── LICENSE
+│       └── README.md
 ```
 
-## License
+## Plugin Validation
 
-Please see each linked plugin for the relevant LICENSE file.
+Validate the plugin structure:
 
-## Documentation
+```bash
+claude plugin validate ./external_plugins/bocha-web-search
+```
 
-For more information on developing Claude Code plugins, see the [official documentation](https://code.claude.com/docs/en/plugins).
+Run the plugin test suite:
+
+```bash
+cd external_plugins/bocha-web-search
+npm test
+```
+
+## User Guide
+
+- Plugin README: [external\_plugins/bocha-web-search/README.md](file:///Users/zhangkairui/Bocha/Agent/claude-plugins-official/external_plugins/bocha-web-search/README.md)
+- Chinese README: [README.zh-CN.md](file:///Users/zhangkairui/Bocha/Agent/claude-plugins-official/README.zh-CN.md)
+
+## Notes
+
+- `BOCHA_API_KEY` must be provided through environment variables.
+- `bocha_web_search` is exposed as an MCP tool.
+- The included skill guides Claude to use Bocha when the user needs fresh web information, news, or fact checking.

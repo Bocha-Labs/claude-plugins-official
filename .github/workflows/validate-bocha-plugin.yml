@@ -1,0 +1,36 @@
+name: Validate Bocha Plugin
+
+on:
+  pull_request:
+    paths:
+      - ".claude-plugin/**"
+      - "external_plugins/bocha-web-search/**"
+      - "docs/integrations/bocha-web-search.md"
+  push:
+    branches: ["main"]
+    paths:
+      - ".claude-plugin/**"
+      - "external_plugins/bocha-web-search/**"
+      - "docs/integrations/bocha-web-search.md"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate plugin structure
+        run: npx @anthropic-ai/claude-code plugin validate ./external_plugins/bocha-web-search
+
+      - name: Validate marketplace manifest
+        run: npx @anthropic-ai/claude-code plugin validate ./.claude-plugin/marketplace.json
+
+      - name: Run plugin tests
+        working-directory: ./external_plugins/bocha-web-search
+        run: npm test

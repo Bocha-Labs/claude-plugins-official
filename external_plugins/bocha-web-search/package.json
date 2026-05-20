@@ -1,0 +1,13 @@
+{
+  "name": "bocha-web-search-plugin",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": "./server.js",
+  "scripts": {
+    "start": "node ./server.js",
+    "test": "node --test",
+    "validate": "claude plugin validate .",
+    "test:live": "node --test --test-name-pattern=live"
+  }
+}
